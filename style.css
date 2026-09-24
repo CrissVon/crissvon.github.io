@@ -1,0 +1,130 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+}
+
+.schedule {
+    width: 94%;
+    margin: 0 auto;
+}
+
+h1 {
+    height: 60px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Таблиця */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-bottom: 25px;
+}
+
+th,
+td {
+    border: 1px solid #222;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Заголовки днів */
+
+thead th {
+    height: 34px;
+    background: #ff0000;
+    color: white;
+
+    font-size: 14px;
+    font-weight: bold;
+}
+
+thead .empty {
+    width: 30px;
+    background: white;
+    border-top-color: white;
+    border-left-color: white;
+}
+
+.time-title {
+    width: 95px;
+}
+
+/* Номери пар */
+
+.number {
+    width: 30px;
+    background: #4a76bd;
+    color: white;
+
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Заняття */
+
+tbody tr {
+    height: 55px;
+}
+
+tbody td {
+    padding: 5px 7px;
+
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: bold;
+}
+
+tbody span {
+    font-weight: bold;
+}
+
+/* Час */
+
+.time {
+    width: 95px;
+    white-space: nowrap;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Адаптація */
+
+@media (max-width: 900px) {
+
+    .schedule {
+        width: 950px;
+        margin: 0;
+    }
+
+    body {
+        overflow-x: auto;
+    }
+
+    h1 {
+        font-size: 18px;
+    }
+
+    tbody td {
+        font-size: 11px;
+    }
+
+    thead th {
+        font-size: 12px;
+    }
+}
