@@ -1,0 +1,324 @@
+{
+  "meta": {
+    "group": "П-21",
+    "week_anchor": {
+      "date": "2026-10-12",
+      "week": 1
+    },
+    "generated_at": "2026-10-19T01:54:54+03:00"
+  },
+  "bell_schedule": {
+    "1": {
+      "start": "08:00",
+      "end": "09:35"
+    },
+    "2": {
+      "start": "09:50",
+      "end": "11:25"
+    },
+    "3": {
+      "start": "11:40",
+      "end": "13:15"
+    },
+    "4": {
+      "start": "13:30",
+      "end": "15:05"
+    },
+    "5": {
+      "start": "15:20",
+      "end": "16:55"
+    }
+  },
+  "teachers": {
+    "t_119df8": {
+      "name": "Базильчук Т.Г.",
+      "link": "https://meet.google.com/zsf-ymkv-bkh"
+    },
+    "t_35b673": {
+      "name": "Ганненко Л.В.",
+      "link": "https://us05web.zoom.us/j/6185246444?pwd=Zy9zYXBNZU1JSEE4UGY3b0FxSnVlZz09"
+    },
+    "t_3e7c1c": {
+      "name": "Ціпоренко Я.І.",
+      "link": "https://meet.google.com/awz-sprz-gbi"
+    },
+    "t_41a7de": {
+      "name": "Чепур О.О.",
+      "link": "https://us04web.zoom.us/j/75877759435?pwd=Us9bNlRgXZbLwrRUzkaRZDyFbUB5Dk.1"
+    },
+    "t_6ffb73": {
+      "name": "Портна М.Г.",
+      "link": "https://us04web.zoom.us/j/7930619599?pwd=WWhUUGVwS0RkK08yUjRFY0kxU1JHdz09"
+    },
+    "t_7dbca1": {
+      "name": "Майдан А.В.",
+      "link": "https://us04web.zoom.us/j/9725123788?pwd=R001Z3BpcFNhZ0tKL2xvNHJSWFdoQT09&omn=77180326621"
+    },
+    "t_7ddd86": {
+      "name": "Савіна Л.П.",
+      "link": "https://us04web.zoom.us/j/4424345889?pwd=yPqeiASgYJmdadhgqgEBbkVmhS4b2i.1&omn=79018831484"
+    },
+    "t_8d0523": {
+      "name": "Гусак І.В.",
+      "link": "https://meet.google.com/uha-xsnj-rjw"
+    },
+    "t_e21589": {
+      "name": "Чуйков А.С.",
+      "link": "https://meet.google.com/ncm-rtnn-eiw"
+    },
+    "t_e4adfc": {
+      "name": "Якобчук О.М.",
+      "link": "https://meet.google.com/crp-stbg-sxa"
+    },
+    "t_e9e3c4": {
+      "name": "Бардишев М.М.",
+      "link": "https://meet.google.com/ymz-mjtt-duq"
+    },
+    "t_f72b38": {
+      "name": "Крещанова С.Л.",
+      "link": "https://us04web.zoom.us/j/73679983993?pwd=T1ZVTy9kMVk5cnZjTDJDVDQ3TzVsUT09"
+    }
+  },
+  "base_schedule": {
+    "week_1": {
+      "monday": [
+        {
+          "lesson": 2,
+          "subject": "Математика",
+          "teacher_id": "t_7ddd86"
+        },
+        {
+          "lesson": 3,
+          "subject": "Історія України",
+          "teacher_id": "t_e9e3c4"
+        },
+        {
+          "lesson": 4,
+          "subject": "Правознавство",
+          "teacher_id": "t_e4adfc"
+        },
+        {
+          "lesson": 5,
+          "subject": "Українська мова",
+          "teacher_id": "t_8d0523"
+        }
+      ],
+      "tuesday": [
+        {
+          "lesson": 2,
+          "subject": "Економічна теорія",
+          "teacher_id": "t_119df8"
+        },
+        {
+          "lesson": 3,
+          "subject": "Лінійна алгебра та аналітична геометрія",
+          "teacher_id": "t_7ddd86"
+        },
+        {
+          "lesson": 4,
+          "subject": "Історія України (факультатив)",
+          "teacher_id": "t_e9e3c4",
+          "link": "https://meet.google.com/fhn-empk-wuu"
+        }
+      ],
+      "wednesday": [
+        {
+          "lesson": 2,
+          "subject": "Лінійна алгебра та аналітична геометрія",
+          "teacher_id": "t_7ddd86"
+        },
+        {
+          "lesson": 3,
+          "subject": "Екологія",
+          "teacher_id": "t_6ffb73"
+        },
+        {
+          "lesson": 4,
+          "subject": "Математичний аналіз",
+          "teacher_id": "t_e21589",
+          "link": "https://meet.google.com/ewb-wxmt-vfr"
+        }
+      ],
+      "thursday": [
+        {
+          "lesson": 2,
+          "subject": "Основи програмування",
+          "teacher_id": "t_7dbca1"
+        },
+        {
+          "lesson": 3,
+          "subject": "Фізика (вибрані розділи)",
+          "teacher_id": "t_35b673"
+        },
+        {
+          "lesson": 4,
+          "subject": "Математична логіка",
+          "teacher_id": "t_e21589"
+        },
+        {
+          "lesson": 5,
+          "subject": "Українська література",
+          "teacher_id": "t_8d0523",
+          "link": "https://meet.google.com/egu-ruxm-prk"
+        }
+      ],
+      "friday": [
+        {
+          "lesson": 2,
+          "subject": "Іноземна мова",
+          "teacher_ids": [
+            "t_f72b38",
+            "t_41a7de"
+          ]
+        },
+        {
+          "lesson": 3,
+          "subject": "Фізична культура",
+          "teacher_id": "t_3e7c1c"
+        },
+        {
+          "lesson": 4,
+          "subject": "Основи програмування",
+          "teacher_id": "t_7dbca1"
+        }
+      ]
+    },
+    "week_2": {
+      "monday": [
+        {
+          "lesson": 2,
+          "subject": "Математика",
+          "teacher_id": "t_7ddd86"
+        },
+        {
+          "lesson": 3,
+          "subject": "Історія України",
+          "teacher_id": "t_e9e3c4"
+        },
+        {
+          "lesson": 4,
+          "subject": "Правознавство",
+          "teacher_id": "t_e4adfc"
+        },
+        {
+          "lesson": 5,
+          "subject": "Українська мова",
+          "teacher_id": "t_8d0523"
+        }
+      ],
+      "tuesday": [
+        {
+          "lesson": 2,
+          "subject": "Економічна теорія",
+          "teacher_id": "t_119df8"
+        },
+        {
+          "lesson": 3,
+          "subject": "Лінійна алгебра та аналітична геометрія",
+          "teacher_id": "t_7ddd86"
+        },
+        {
+          "lesson": 4,
+          "subject": "Історія України (факультатив)",
+          "teacher_id": "t_e9e3c4",
+          "link": "https://meet.google.com/fhn-empk-wuu"
+        }
+      ],
+      "wednesday": [
+        {
+          "lesson": 2,
+          "subject": "Лінійна алгебра та аналітична геометрія",
+          "teacher_id": "t_7ddd86"
+        },
+        {
+          "lesson": 3,
+          "subject": "Екологія",
+          "teacher_id": "t_6ffb73"
+        },
+        {
+          "lesson": 4,
+          "subject": "Математичний аналіз",
+          "teacher_id": "t_e21589",
+          "link": "https://meet.google.com/ewb-wxmt-vfr"
+        }
+      ],
+      "thursday": [
+        {
+          "lesson": 2,
+          "subject": "Основи програмування",
+          "teacher_id": "t_7dbca1"
+        },
+        {
+          "lesson": 3,
+          "subject": "Фізика (вибрані розділи)",
+          "teacher_id": "t_35b673"
+        },
+        {
+          "lesson": 4,
+          "subject": "Математична логіка",
+          "teacher_id": "t_e21589"
+        },
+        {
+          "lesson": 5,
+          "subject": "Українська література",
+          "teacher_id": "t_8d0523",
+          "link": "https://meet.google.com/egu-ruxm-prk"
+        }
+      ],
+      "friday": [
+        {
+          "lesson": 2,
+          "subject": "Іноземна мова",
+          "teacher_ids": [
+            "t_f72b38",
+            "t_41a7de"
+          ]
+        },
+        {
+          "lesson": 3,
+          "subject": "Фізична культура",
+          "teacher_id": "t_3e7c1c"
+        },
+        {
+          "lesson": 4,
+          "subject": "Основи програмування",
+          "teacher_id": "t_7dbca1"
+        }
+      ]
+    }
+  },
+  "special_days": {
+    "2026-10-17": {
+      "day": "monday",
+      "week": 2
+    },
+    "2026-10-24": {
+      "day": "tuesday",
+      "week": 2
+    },
+    "2026-10-31": {
+      "day": "wednesday",
+      "week": 2
+    },
+    "2026-11-07": {
+      "day": "thursday",
+      "week": 2
+    },
+    "2026-11-14": {
+      "day": "friday",
+      "week": 2
+    },
+    "2026-11-21": {
+      "day": "monday",
+      "week": 1
+    }
+  },
+  "substitutions": {
+    "2026-10-16": {
+      "1": {
+        "subject": "економ.теорія",
+        "teacher_id": "t_119df8"
+      }
+    }
+  }
+}

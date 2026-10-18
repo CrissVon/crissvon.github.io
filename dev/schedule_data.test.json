@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "week_anchor": { "date": "2026-10-12", "week": 1 },
+    "generated_at": "2026-10-18T22:00:00+03:00"
+  },
+  "bell_schedule": {
+    "1": { "start": "08:30", "end": "09:50" },
+    "2": { "start": "10:00", "end": "11:20" },
+    "3": { "start": "11:50", "end": "13:10" },
+    "4": { "start": "13:30", "end": "14:50" },
+    "5": { "start": "15:00", "end": "16:20" }
+  },
+  "teachers": {
+    "t_01": { "name": "Савіна Л.П.", "link": "https://zoom.us/j/1111111111" },
+    "t_02": { "name": "Майдан А.В.", "link": "https://meet.google.com/aaa-bbbb-ccc" },
+    "t_03": { "name": "Коваленко І.О.", "link": "https://zoom.us/j/2222222222" },
+    "t_04": { "name": "Шевченко Т.М.", "link": "https://meet.google.com/ddd-eeee-fff" },
+    "t_05": { "name": "Бондар О.С.", "link": "https://zoom.us/j/3333333333" },
+    "t_06": { "name": "Мельник В.Р.", "link": null }
+  },
+  "base_schedule": {
+    "week_1": {
+      "monday": [
+        { "lesson": 1, "subject": "Математика", "teacher_id": "t_01" },
+        { "lesson": 2, "subject": "Фізика", "teacher_id": "t_03" },
+        { "lesson": 3, "subject": "Українська мова", "teacher_id": "t_04" },
+        { "lesson": 4, "subject": "Фізкультура", "teacher_id": "t_05" }
+      ],
+      "tuesday": [
+        { "lesson": 1, "subject": "Основи програмування", "teacher_id": "t_02" },
+        { "lesson": 2, "subject": "Основи програмування", "teacher_id": "t_02" },
+        { "lesson": 3, "subject": "Математика", "teacher_id": "t_01" },
+        { "lesson": 4, "subject": "Історія України", "teacher_id": "t_04" }
+      ],
+      "wednesday": [
+        { "lesson": 2, "subject": "Англійська мова", "teacher_id": "t_06" },
+        { "lesson": 3, "subject": "Фізика", "teacher_id": "t_03" },
+        { "lesson": 4, "subject": "Інформатика", "teacher_id": "t_02" }
+      ],
+      "thursday": [
+        { "lesson": 1, "subject": "Математика", "teacher_id": "t_01" },
+        { "lesson": 2, "subject": "Англійська мова", "teacher_id": "t_06" },
+        { "lesson": 3, "subject": "Основи програмування", "teacher_id": "t_02" }
+      ],
+      "friday": [
+        { "lesson": 1, "subject": "Історія України", "teacher_id": "t_04" },
+        { "lesson": 2, "subject": "Українська мова", "teacher_id": "t_04" },
+        { "lesson": 3, "subject": "Фізкультура", "teacher_id": "t_05" }
+      ]
+    },
+    "week_2": {
+      "monday": [
+        { "lesson": 2, "subject": "Основи програмування", "teacher_id": "t_02" },
+        { "lesson": 3, "subject": "Математика", "teacher_id": "t_01" },
+        { "lesson": 4, "subject": "Англійська мова", "teacher_id": "t_06" }
+      ],
+      "tuesday": [
+        { "lesson": 1, "subject": "Фізика", "teacher_id": "t_03" },
+        { "lesson": 2, "subject": "Українська мова", "teacher_id": "t_04" },
+        { "lesson": 3, "subject": "Інформатика", "teacher_id": "t_02" },
+        { "lesson": 4, "subject": "Математика", "teacher_id": "t_01" }
+      ],
+      "wednesday": [
+        { "lesson": 1, "subject": "Історія України", "teacher_id": "t_04" },
+        { "lesson": 2, "subject": "Математика", "teacher_id": "t_01" },
+        { "lesson": 3, "subject": "Фізкультура", "teacher_id": "t_05" },
+        { "lesson": 4, "subject": "Основи програмування", "teacher_id": "t_02" }
+      ],
+      "thursday": [
+        { "lesson": 1, "subject": "Фізика", "teacher_id": "t_03" },
+        { "lesson": 2, "subject": "Англійська мова", "teacher_id": "t_06" },
+        { "lesson": 3, "subject": "Інформатика", "teacher_id": "t_02" }
+      ],
+      "friday": [
+        { "lesson": 1, "subject": "Українська мова", "teacher_id": "t_04" },
+        { "lesson": 2, "subject": "Математика", "teacher_id": "t_01" },
+        { "lesson": 3, "subject": "Історія України", "teacher_id": "t_04" }
+      ]
+    }
+  },
+  "special_days": {
+    "2026-10-24": "wednesday"
+  },
+  "substitutions": {
+    "2026-10-20": {
+      "2": { "subject": "Основи програмування", "teacher_id": "t_02" },
+      "5": { "subject": "Консультація з математики", "teacher_id": "t_01" }
+    },
+    "2026-10-22": {
+      "1": { "subject": "Фізика", "teacher_id": "t_03" }
+    },
+    "2026-10-24": {
+      "1": { "subject": "Основи програмування", "teacher_id": "t_02" },
+      "3": { "cancelled": true }
+    }
+  }
+}

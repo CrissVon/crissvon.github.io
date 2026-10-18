@@ -1,0 +1,416 @@
+:root {
+  --bg: #121212;
+  --surface: #1a1a1a;
+  --surface-2: #242424;
+  --border: #2e2e2e;
+  --text: #ececec;
+  --muted: #8c8c8c;
+  --accent: #ececec;      /* головна дія = інверсія тексту, без «фірмового» кольору */
+  --on-accent: #121212;
+  --link: #7fb2e5;
+  --ok: #46c981;
+  --warn: #e8b931;
+  --warn-text: #e8b931;
+  --danger: #f0616d;
+  --live-bg: rgba(70,201,129,.09);
+  --radius: 10px;
+  --font: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+/* М'яка світла тема: нейтрально-сіра, не чисто біла */
+:root[data-theme="light"] {
+  --bg: #e9e9e9;
+  --surface: #f3f3f3;
+  --surface-2: #e0e0e0;
+  --border: #d0d0d0;
+  --text: #1a1a1a;
+  --muted: #666666;
+  --accent: #1a1a1a;
+  --on-accent: #f3f3f3;
+  --link: #2f6db3;
+  --ok: #1c9e55;
+  --warn: #c48a00;
+  --warn-text: #7a5200;
+  --danger: #c93045;
+  --live-bg: rgba(28,158,85,.10);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+/* місце під скролбар резервується завжди — сторінка не смикається, коли він з'являється */
+html { background: var(--bg); scrollbar-gutter: stable; }
+@supports not (scrollbar-gutter: stable) {
+  html { overflow-y: scroll; }
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.4;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* плавна зміна теми */
+body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today-btn {
+  transition: background-color .25s, border-color .25s, color .25s;
+}
+
+/* ---------- РОЗКЛАДКА ---------- */
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* більші екрани: та сама колонка, але трохи ширша і з більшими відступами */
+@media (min-width: 700px) {
+  .app {
+    max-width: 720px;
+    padding: 32px 24px 56px;
+    gap: 22px;
+  }
+}
+
+/* ---------- TOPBAR ---------- */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.topbar__title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.theme-btn {
+  display: grid;
+  place-items: center;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.theme-btn:hover { background: var(--surface); }
+.theme-btn:active { transform: scale(.95); }
+.theme-btn svg { width: 19px; height: 19px; }
+.theme-btn .icon-moon { display: none; }
+:root[data-theme="light"] .theme-btn .icon-sun { display: none; }
+:root[data-theme="light"] .theme-btn .icon-moon { display: block; }
+
+/* ---------- HERO ---------- */
+.hero {
+  position: relative;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.hero.is-link { cursor: pointer; transition: transform .1s, border-color .2s, background-color .25s; }
+.hero.is-link:active { transform: scale(.99); }
+.hero.is-link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.hero.is-live {
+  border-color: var(--ok);
+  background: linear-gradient(var(--live-bg), var(--live-bg)), var(--surface);
+}
+
+.hero__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.hero__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.hero__label::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  /* «Наступна пара»: м'яка зеленувата точка */
+  background: color-mix(in srgb, var(--ok) 60%, var(--muted));
+}
+.hero.is-live .hero__label { color: var(--ok); }
+.hero.is-live .hero__label::before,
+.hero.is-idle .hero__label::before { background: currentColor; }
+.hero.is-idle .hero__label { color: var(--muted); }
+.hero__clock { font-size: 14px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.hero__subject {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.015em;
+}
+.hero__meta { margin-top: 8px; color: var(--muted); font-size: 14px; }
+.hero__teachers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.hero__teachers:empty { display: none; }
+.hero__timer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.hero__timer:empty { display: none; }
+.hero__timer strong { margin-left: 6px; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+
+.progress {
+  margin-top: 14px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.progress__bar {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--ok);
+  transition: width .6s linear;
+}
+
+.join {
+  display: block;
+  margin-top: 16px;
+  padding: 13px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--on-accent);
+  text-decoration: none;
+  background: var(--accent);
+}
+.join:active { transform: scale(.98); }
+.join[hidden] { display: none; }
+
+/* ---------- WEEKS ---------- */
+.schedule { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.weeks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.weeks__btn {
+  padding: 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.weeks__btn.is-active { background: var(--accent); color: var(--on-accent); }
+
+/* панель: перемикач тижня + «Сьогодні». Кнопка завжди на місці (лише неактивна),
+   тому ширина перемикача не стрибає при переході між днями */
+.schedule__bar { display: flex; gap: 8px; align-items: stretch; }
+.schedule__bar .weeks { flex: 1; }
+.today-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 112px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.today-btn::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+}
+.today-btn:hover:not(:disabled) { border-color: var(--muted); }
+.today-btn:active:not(:disabled) { transform: scale(.97); }
+.today-btn:disabled { color: var(--muted); cursor: default; }
+.today-btn:disabled::before { background: var(--ok); border-color: var(--ok); }
+
+/* ---------- DAYS ---------- */
+.days {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.days::-webkit-scrollbar { display: none; }
+
+.day {
+  position: relative;
+  flex: 1 0 56px;
+  scroll-snap-align: start;
+  padding: 9px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.day:hover:not(.is-active) { background: var(--surface); }
+.day__name { display: block; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+.day__num { display: block; margin-top: 2px; font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.day.is-active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.day.is-active .day__name { color: var(--on-accent); opacity: .7; }
+.day.is-today::after {
+  content: "";
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+/* робоча субота: тонка жовта риска знизу */
+.day.is-special::before {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: 4px;
+  width: 14px; height: 2px;
+  margin-left: -7px;
+  border-radius: 1px;
+  background: var(--warn);
+}
+
+.day-note {
+  color: var(--warn-text);
+  font-size: 13px;
+}
+
+/* ---------- LESSONS ---------- */
+/* пари — рядки розкладу з тонкими роздільниками, а не окремі картки */
+.lessons {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: 20px 52px minmax(0, 1fr);
+  column-gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.card:last-child { border-bottom: 0; }
+.card__num {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  padding-top: 1px;
+}
+.card__when { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+.card__start { font-size: 16px; font-weight: 600; line-height: 1.25; }
+.card__end { font-size: 13px; color: var(--muted); }
+.card__subject { font-size: 16px; font-weight: 600; line-height: 1.3; }
+
+/* викладачі */
+.card__teachers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+a.chip {
+  color: var(--link);
+  background: color-mix(in srgb, var(--link) 8%, transparent);
+  border-color: color-mix(in srgb, var(--link) 32%, transparent);
+}
+a.chip::after { content: " \2197"; }
+a.chip:hover {
+  background: color-mix(in srgb, var(--link) 16%, transparent);
+  border-color: color-mix(in srgb, var(--link) 55%, transparent);
+}
+a.chip:active { transform: scale(.97); }
+.chip--plain { color: var(--muted); }
+
+/* статус — слово, а не залита плашка */
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: baseline;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--warn-text);
+}
+
+.card.is-sub .card__num { color: var(--warn-text); }
+
+.card.is-cancelled { opacity: .85; }
+.card.is-cancelled .card__subject { text-decoration: line-through; color: var(--muted); }
+.card.is-cancelled .badge { color: var(--danger); }
+.card.is-cancelled .card__num { color: var(--danger); }
+
+.card.is-now { background: var(--live-bg); }
+.card.is-now .card__num,
+.card.is-now .card__start { color: var(--ok); }
+
+.empty, .error {
+  padding: 28px 16px;
+  text-align: center;
+  border-radius: var(--radius);
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+}
+.error { border-color: var(--danger); color: var(--danger); }
+/* всередині рамки розкладу окрема пунктирна рамка не потрібна */
+.lessons > .empty, .lessons > .error { border: 0; border-radius: 0; }
+
+/* ---------- FOOTER ---------- */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.foot:empty { display: none; }
+.foot__link { color: var(--link); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent); }
+.foot__link:hover { text-decoration-color: var(--link); }
+
+@media (prefers-reduced-motion: reduce) {
+  .progress__bar { transition: none; }
+  body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today-btn { transition: none; }
+}

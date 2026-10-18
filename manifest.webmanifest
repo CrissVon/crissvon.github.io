@@ -1,0 +1,13 @@
+{
+  "name": "Розклад П-811-21",
+  "short_name": "Розклад",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "uk",
+  "icons": [
+    { "src": "assets/favicon.png", "sizes": "472x529", "type": "image/png", "purpose": "any" }
+  ]
+}
