@@ -5,7 +5,7 @@
       "date": "2026-10-19",
       "week": 2
     },
-    "generated_at": "2026-10-19T19:09:18+03:00"
+    "generated_at": "2026-10-19T20:09:14+03:00"
   },
   "bell_schedule": {
     "1": {
@@ -32,51 +32,51 @@
   "teachers": {
     "t_119df8": {
       "name": "Базильчук Т.Г.",
-      "link": null
+      "link": "https://meet.google.com/zsf-ymkv-bkh"
     },
     "t_35b673": {
       "name": "Ганненко Л.В.",
-      "link": null
+      "link": "https://us05web.zoom.us/j/6185246444?pwd=Zy9zYXBNZU1JSEE4UGY3b0FxSnVlZz09"
     },
     "t_3e7c1c": {
       "name": "Ціпоренко Я.І.",
-      "link": null
+      "link": "https://meet.google.com/awz-sprz-gbi"
     },
     "t_41a7de": {
       "name": "Чепур О.О.",
-      "link": null
+      "link": "https://us04web.zoom.us/j/75877759435?pwd=Us9bNlRgXZbLwrRUzkaRZDyFbUB5Dk.1"
     },
     "t_6ffb73": {
       "name": "Портна М.Г.",
-      "link": null
+      "link": "https://us04web.zoom.us/j/7930619599?pwd=WWhUUGVwS0RkK08yUjRFY0kxU1JHdz09"
     },
     "t_7dbca1": {
       "name": "Майдан А.В.",
-      "link": null
+      "link": "https://us04web.zoom.us/j/9725123788?pwd=R001Z3BpcFNhZ0tKL2xvNHJSWFdoQT09&omn=77180326621"
     },
     "t_7ddd86": {
       "name": "Савіна Л.П.",
-      "link": null
+      "link": "https://us04web.zoom.us/j/4424345889?pwd=yPqeiASgYJmdadhgqgEBbkVmhS4b2i.1&omn=79018831484"
     },
     "t_8d0523": {
       "name": "Гусак І.В.",
-      "link": null
+      "link": "https://meet.google.com/uha-xsnj-rjw"
     },
     "t_e21589": {
       "name": "Чуйков А.С.",
-      "link": null
+      "link": "https://meet.google.com/ncm-rtnn-eiw"
     },
     "t_e4adfc": {
       "name": "Якобчук О.М.",
-      "link": null
+      "link": "https://meet.google.com/crp-stbg-sxa"
     },
     "t_e9e3c4": {
       "name": "Бардишев М.М.",
-      "link": null
+      "link": "https://meet.google.com/ymz-mjtt-duq"
     },
     "t_f72b38": {
       "name": "Крещанова С.Л.",
-      "link": null
+      "link": "https://us04web.zoom.us/j/73679983993?pwd=T1ZVTy9kMVk5cnZjTDJDVDQ3TzVsUT09"
     }
   },
   "base_schedule": {
@@ -117,7 +117,8 @@
         {
           "lesson": 4,
           "subject": "Історія України (факультатив)",
-          "teacher_id": "t_e9e3c4"
+          "teacher_id": "t_e9e3c4",
+          "link": "https://meet.google.com/fhn-empk-wuu"
         }
       ],
       "wednesday": [
@@ -134,7 +135,8 @@
         {
           "lesson": 4,
           "subject": "Математичний аналіз",
-          "teacher_id": "t_e21589"
+          "teacher_id": "t_e21589",
+          "link": "https://meet.google.com/ewb-wxmt-vfr"
         }
       ],
       "thursday": [
@@ -156,7 +158,8 @@
         {
           "lesson": 5,
           "subject": "Українська література",
-          "teacher_id": "t_8d0523"
+          "teacher_id": "t_8d0523",
+          "link": "https://meet.google.com/egu-ruxm-prk"
         }
       ],
       "friday": [
@@ -217,7 +220,8 @@
         {
           "lesson": 4,
           "subject": "Історія України (факультатив)",
-          "teacher_id": "t_e9e3c4"
+          "teacher_id": "t_e9e3c4",
+          "link": "https://meet.google.com/fhn-empk-wuu"
         }
       ],
       "wednesday": [
@@ -234,7 +238,8 @@
         {
           "lesson": 4,
           "subject": "Математичний аналіз",
-          "teacher_id": "t_e21589"
+          "teacher_id": "t_e21589",
+          "link": "https://meet.google.com/ewb-wxmt-vfr"
         }
       ],
       "thursday": [
@@ -256,7 +261,8 @@
         {
           "lesson": 5,
           "subject": "Українська література",
-          "teacher_id": "t_8d0523"
+          "teacher_id": "t_8d0523",
+          "link": "https://meet.google.com/egu-ruxm-prk"
         }
       ],
       "friday": [
@@ -281,7 +287,36 @@
       ]
     }
   },
-  "special_days": {},
+  "special_days": {
+    "2026-10-10": {
+      "day": "friday",
+      "week": 1
+    },
+    "2026-10-17": {
+      "day": "monday",
+      "week": 2
+    },
+    "2026-10-24": {
+      "day": "tuesday",
+      "week": 2
+    },
+    "2026-10-31": {
+      "day": "wednesday",
+      "week": 2
+    },
+    "2026-11-07": {
+      "day": "thursday",
+      "week": 2
+    },
+    "2026-11-14": {
+      "day": "friday",
+      "week": 2
+    },
+    "2026-11-21": {
+      "day": "monday",
+      "week": 1
+    }
+  },
   "substitutions": {
     "2026-10-16": {
       "1": {
