@@ -2,10 +2,10 @@
   "meta": {
     "group": "П-21",
     "week_anchor": {
-      "date": "2026-10-12",
-      "week": 1
+      "date": "2026-10-19",
+      "week": 2
     },
-    "generated_at": "2026-10-19T01:54:54+03:00"
+    "generated_at": "2026-10-19T19:09:18+03:00"
   },
   "bell_schedule": {
     "1": {
@@ -32,51 +32,51 @@
   "teachers": {
     "t_119df8": {
       "name": "Базильчук Т.Г.",
-      "link": "https://meet.google.com/zsf-ymkv-bkh"
+      "link": null
     },
     "t_35b673": {
       "name": "Ганненко Л.В.",
-      "link": "https://us05web.zoom.us/j/6185246444?pwd=Zy9zYXBNZU1JSEE4UGY3b0FxSnVlZz09"
+      "link": null
     },
     "t_3e7c1c": {
       "name": "Ціпоренко Я.І.",
-      "link": "https://meet.google.com/awz-sprz-gbi"
+      "link": null
     },
     "t_41a7de": {
       "name": "Чепур О.О.",
-      "link": "https://us04web.zoom.us/j/75877759435?pwd=Us9bNlRgXZbLwrRUzkaRZDyFbUB5Dk.1"
+      "link": null
     },
     "t_6ffb73": {
       "name": "Портна М.Г.",
-      "link": "https://us04web.zoom.us/j/7930619599?pwd=WWhUUGVwS0RkK08yUjRFY0kxU1JHdz09"
+      "link": null
     },
     "t_7dbca1": {
       "name": "Майдан А.В.",
-      "link": "https://us04web.zoom.us/j/9725123788?pwd=R001Z3BpcFNhZ0tKL2xvNHJSWFdoQT09&omn=77180326621"
+      "link": null
     },
     "t_7ddd86": {
       "name": "Савіна Л.П.",
-      "link": "https://us04web.zoom.us/j/4424345889?pwd=yPqeiASgYJmdadhgqgEBbkVmhS4b2i.1&omn=79018831484"
+      "link": null
     },
     "t_8d0523": {
       "name": "Гусак І.В.",
-      "link": "https://meet.google.com/uha-xsnj-rjw"
+      "link": null
     },
     "t_e21589": {
       "name": "Чуйков А.С.",
-      "link": "https://meet.google.com/ncm-rtnn-eiw"
+      "link": null
     },
     "t_e4adfc": {
       "name": "Якобчук О.М.",
-      "link": "https://meet.google.com/crp-stbg-sxa"
+      "link": null
     },
     "t_e9e3c4": {
       "name": "Бардишев М.М.",
-      "link": "https://meet.google.com/ymz-mjtt-duq"
+      "link": null
     },
     "t_f72b38": {
       "name": "Крещанова С.Л.",
-      "link": "https://us04web.zoom.us/j/73679983993?pwd=T1ZVTy9kMVk5cnZjTDJDVDQ3TzVsUT09"
+      "link": null
     }
   },
   "base_schedule": {
@@ -117,8 +117,7 @@
         {
           "lesson": 4,
           "subject": "Історія України (факультатив)",
-          "teacher_id": "t_e9e3c4",
-          "link": "https://meet.google.com/fhn-empk-wuu"
+          "teacher_id": "t_e9e3c4"
         }
       ],
       "wednesday": [
@@ -135,8 +134,7 @@
         {
           "lesson": 4,
           "subject": "Математичний аналіз",
-          "teacher_id": "t_e21589",
-          "link": "https://meet.google.com/ewb-wxmt-vfr"
+          "teacher_id": "t_e21589"
         }
       ],
       "thursday": [
@@ -158,8 +156,7 @@
         {
           "lesson": 5,
           "subject": "Українська література",
-          "teacher_id": "t_8d0523",
-          "link": "https://meet.google.com/egu-ruxm-prk"
+          "teacher_id": "t_8d0523"
         }
       ],
       "friday": [
@@ -220,8 +217,7 @@
         {
           "lesson": 4,
           "subject": "Історія України (факультатив)",
-          "teacher_id": "t_e9e3c4",
-          "link": "https://meet.google.com/fhn-empk-wuu"
+          "teacher_id": "t_e9e3c4"
         }
       ],
       "wednesday": [
@@ -238,8 +234,7 @@
         {
           "lesson": 4,
           "subject": "Математичний аналіз",
-          "teacher_id": "t_e21589",
-          "link": "https://meet.google.com/ewb-wxmt-vfr"
+          "teacher_id": "t_e21589"
         }
       ],
       "thursday": [
@@ -261,8 +256,7 @@
         {
           "lesson": 5,
           "subject": "Українська література",
-          "teacher_id": "t_8d0523",
-          "link": "https://meet.google.com/egu-ruxm-prk"
+          "teacher_id": "t_8d0523"
         }
       ],
       "friday": [
@@ -287,37 +281,18 @@
       ]
     }
   },
-  "special_days": {
-    "2026-10-17": {
-      "day": "monday",
-      "week": 2
-    },
-    "2026-10-24": {
-      "day": "tuesday",
-      "week": 2
-    },
-    "2026-10-31": {
-      "day": "wednesday",
-      "week": 2
-    },
-    "2026-11-07": {
-      "day": "thursday",
-      "week": 2
-    },
-    "2026-11-14": {
-      "day": "friday",
-      "week": 2
-    },
-    "2026-11-21": {
-      "day": "monday",
-      "week": 1
-    }
-  },
+  "special_days": {},
   "substitutions": {
     "2026-10-16": {
       "1": {
         "subject": "економ.теорія",
         "teacher_id": "t_119df8"
+      }
+    },
+    "2026-10-20": {
+      "1": {
+        "subject": "правознавство",
+        "teacher_id": "t_e4adfc"
       }
     }
   }
