@@ -7,7 +7,12 @@
   'use strict';
 
   const CONFIG = {
-    DATA_URL: 'schedule_data.json',   // для продакшну: raw-посилання на Gist / GitHub
+    // Джерела JSON за порядком: спершу бот на Render, далі запасний файл поруч із сайтом.
+    DATA_URLS: [
+      'https://substitution-3s9d.onrender.com/schedule_data.json',
+      'schedule_data.json',
+    ],
+    FETCH_TIMEOUT_MS: 8000,           // скільки чекати на одне джерело перед переходом до наступного
     JOIN_BEFORE_MIN: 10,              // за скільки хвилин до початку з'являється кнопка
     TZ: 'Europe/Kyiv',
     BOT_URL: 'https://t.me/KaiTeh_zaminy_bot',                      // посилання на Telegram-бота із замінами, напр. 'https://t.me/your_bot' (порожньо = не показувати)
@@ -436,11 +441,35 @@
   }
 
   async function load() {
-    const url = params.get('data') || CONFIG.DATA_URL;
-    const sep = url.includes('?') ? '&' : '?';
-    const res = await fetch(url + sep + 't=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.json();
+    const custom = params.get('data');
+    const urls = custom ? [custom] : CONFIG.DATA_URLS;
+    let lastError = new Error('немає джерела даних');
+    for (const url of urls) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), CONFIG.FETCH_TIMEOUT_MS);
+      try {
+        const sep = url.includes('?') ? '&' : '?';
+        const res = await fetch(url + sep + 't=' + Date.now(), { cache: 'no-store', signal: ctrl.signal });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!custom) {
+          try { localStorage.setItem('schedule_cache', JSON.stringify(data)); } catch (e) { /* не критично */ }
+        }
+        return data;
+      } catch (e) {
+        lastError = e; // пробуємо наступне джерело
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    // Жодне джерело не відповіло (офлайн, бот спить): остання успішно завантажена копія
+    if (!custom) {
+      try {
+        const cached = localStorage.getItem('schedule_cache');
+        if (cached) return JSON.parse(cached);
+      } catch (e) { /* не критично */ }
+    }
+    throw lastError;
   }
 
   async function main() {
