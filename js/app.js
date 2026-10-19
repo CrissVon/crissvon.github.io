@@ -16,7 +16,7 @@
     FETCH_TIMEOUT_MS: 8000,           // скільки чекати на одне джерело перед переходом до наступного
     JOIN_BEFORE_MIN: 10,              // за скільки хвилин до початку з'являється кнопка
     TZ: 'Europe/Kyiv',
-    ALERT_URL: '',                    // адреса Cloudflare Worker із тривогами (див. worker/README.md); порожньо = тривоги вимкнені
+    ALERT_URL: 'https://substitution-3s9d.onrender.com/alert',                    // адреса /alert на боті (Render); порожньо = тривоги вимкнені
     BOT_URL: 'https://t.me/KaiTeh_zaminy_bot',                      // посилання на Telegram-бота із замінами, напр. 'https://t.me/your_bot' (порожньо = не показувати)
   };
 
@@ -206,6 +206,24 @@
     document.addEventListener('visibilitychange', run);
   }
 
+  // Напис про тривогу справа вгорі верхньої картки (сама картка не змінюється)
+  function renderHeroAlert() {
+    const pill = $('heroAlert');
+    const al = currentAlert();
+    if (!al) {
+      pill.hidden = true;
+      pill.textContent = '';
+      pill.title = '';
+      return;
+    }
+    const text = 'Пари немає — ' + lowerFirst(al.text);
+    if (pill.textContent !== text) pill.textContent = text;
+    pill.className = 'hero__alert is-' + al.level;
+    const since = fmtHM(al.since);
+    pill.title = since ? 'З ' + since : '';
+    pill.hidden = false;
+  }
+
   /* ---------- Дашборд ---------- */
   // Найближча пара після сьогодні: шукаємо до 14 днів уперед (з урахуванням робочих субот)
   function nextLessonText(todayKey) {
@@ -271,23 +289,11 @@
 
     $('heroClock').textContent = new Date(now).toISOString().slice(11, 16);
 
-    hero.classList.remove('is-live', 'is-idle', 'is-alert-red', 'is-alert-yellow');
+    hero.classList.remove('is-live', 'is-idle');
     progress.hidden = true;
     join.hidden = true;
 
-    // Тривога перекриває все: пари немає, показуємо причину
-    const al = currentAlert();
-    if (al) {
-      hero.classList.add('is-alert-' + al.level);
-      setHeroLink(hero, null);
-      renderHeroTeachers(teachersBox, []);
-      label.textContent = al.level === 'red' ? 'Тривога у Києві' : 'Загроза у Києві';
-      subject.textContent = 'Пари немає';
-      const since = fmtHM(al.since);
-      meta.textContent = al.text + (since ? ' · з ' + since : '');
-      timer.textContent = '';
-      return;
-    }
+    renderHeroAlert();
 
     const current = lessons.find((l) => sec >= l.start && sec < l.end);
     const next = lessons.find((l) => l.start > sec);
@@ -399,21 +405,11 @@
     const isToday = key === dateKeyOf(now);
     const sec = secOfDay(now);
 
-    // Тривога: обводка картки + смуга зверху (лише коли дивимось сьогоднішній день)
-    const al = currentAlert();
-    const showAlert = !!(al && isToday);
-    box.classList.remove('is-alert-red', 'is-alert-yellow');
-    if (showAlert) {
-      box.classList.add('is-alert-' + al.level);
-      const banner = el('div', 'alert-banner');
-      banner.setAttribute('role', 'status');
-      banner.appendChild(el('span', 'alert-banner__icon'));
-      banner.appendChild(el('span', null, 'Пари немає — ' + lowerFirst(al.text)));
-      box.appendChild(banner);
-    }
+    // Тривога: кольором підсвічуємо лише картку пари, що йде зараз (тільки для сьогоднішнього дня)
+    const al = isToday ? currentAlert() : null;
 
     if (lessons.length === 0) {
-      if (!showAlert) box.appendChild(el('div', 'empty', 'Пар немає'));
+      box.appendChild(el('div', 'empty', 'Пар немає'));
       return;
     }
 
@@ -421,7 +417,9 @@
       const card = el('div', 'card');
       if (l.substituted) card.classList.add('is-sub');
       if (l.cancelled) card.classList.add('is-cancelled');
-      if (!showAlert && isToday && !l.cancelled && l.start != null && sec >= l.start && sec < l.end) card.classList.add('is-now');
+      if (isToday && !l.cancelled && l.start != null && sec >= l.start && sec < l.end) {
+        card.classList.add(al ? 'is-alert-' + al.level : 'is-now');
+      }
 
       card.appendChild(el('div', 'card__num', String(l.lesson)));
       const when = el('div', 'card__when');
