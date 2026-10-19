@@ -10,11 +10,13 @@
     // Джерела JSON за порядком: спершу бот на Render, далі запасний файл поруч із сайтом.
     DATA_URLS: [
       'https://substitution-3s9d.onrender.com/schedule_data.json',
-      'schedule_data.json',
     ],
+    // Запасний файл з репозиторію: лише якщо бот недоступний І в браузері ще немає збереженої копії
+    FALLBACK_URL: 'schedule_data.json',
     FETCH_TIMEOUT_MS: 8000,           // скільки чекати на одне джерело перед переходом до наступного
     JOIN_BEFORE_MIN: 10,              // за скільки хвилин до початку з'являється кнопка
     TZ: 'Europe/Kyiv',
+    ALERT_URL: '',                    // адреса Cloudflare Worker із тривогами (див. worker/README.md); порожньо = тривоги вимкнені
     BOT_URL: 'https://t.me/KaiTeh_zaminy_bot',                      // посилання на Telegram-бота із замінами, напр. 'https://t.me/your_bot' (порожньо = не показувати)
   };
 
@@ -138,6 +140,72 @@
       });
   }
 
+  /* ---------- Тривога ---------- */
+  // Джерело: Cloudflare Worker (worker/alert-proxy.js) → { ok, alert: null | { level: 'red'|'yellow', text, since } }
+  // Тест без реальної тривоги:  ?alert=red  або  ?alert=yellow  (і необов'язково &alerttext=Ваш текст)
+  const ALERT_POLL_MS = 45 * 1000;
+  const ALERT_STALE_MS = 3 * 60 * 1000; // дані старіші — ховаємо тривогу, а не показуємо «все спокійно»
+  const alertState = { data: null, at: 0 };
+
+  const forcedAlert = (() => {
+    const lvl = params.get('alert');
+    if (lvl !== 'red' && lvl !== 'yellow') return null;
+    return {
+      level: lvl,
+      text: params.get('alerttext') || (lvl === 'red' ? 'Ракетна загроза' : 'Дронова загроза'),
+      since: new Date().toISOString(),
+    };
+  })();
+
+  function currentAlert() {
+    if (forcedAlert) return forcedAlert;
+    if (!alertState.data) return null;
+    if (Date.now() - alertState.at > ALERT_STALE_MS) return null;
+    return alertState.data;
+  }
+
+  const alertKey = () => {
+    const a = currentAlert();
+    return a ? a.level + '|' + a.text : '';
+  };
+
+  const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+
+  function fmtHM(iso) {
+    const d = new Date(iso);
+    if (!iso || isNaN(d)) return '';
+    try {
+      return new Intl.DateTimeFormat('uk-UA', { timeZone: CONFIG.TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  async function pollAlert() {
+    if (!CONFIG.ALERT_URL || forcedAlert) return;
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 8000);
+      const res = await fetch(CONFIG.ALERT_URL, { cache: 'no-store', signal: ctl.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const j = await res.json();
+      if (!j || j.ok !== true) throw new Error('bad payload');
+      alertState.data = j.alert || null;
+      alertState.at = Date.now();
+    } catch (e) {
+      /* лишаємо попередній стан; після ALERT_STALE_MS він сам зникне */
+    }
+  }
+
+  function startAlertPolling() {
+    if (!CONFIG.ALERT_URL || forcedAlert) return;
+    const run = () => { if (!document.hidden) pollAlert(); };
+    run();
+    setInterval(run, ALERT_POLL_MS);
+    document.addEventListener('visibilitychange', run);
+  }
+
   /* ---------- Дашборд ---------- */
   // Найближча пара після сьогодні: шукаємо до 14 днів уперед (з урахуванням робочих субот)
   function nextLessonText(todayKey) {
@@ -203,9 +271,23 @@
 
     $('heroClock').textContent = new Date(now).toISOString().slice(11, 16);
 
-    hero.classList.remove('is-live', 'is-idle');
+    hero.classList.remove('is-live', 'is-idle', 'is-alert-red', 'is-alert-yellow');
     progress.hidden = true;
     join.hidden = true;
+
+    // Тривога перекриває все: пари немає, показуємо причину
+    const al = currentAlert();
+    if (al) {
+      hero.classList.add('is-alert-' + al.level);
+      setHeroLink(hero, null);
+      renderHeroTeachers(teachersBox, []);
+      label.textContent = al.level === 'red' ? 'Тривога у Києві' : 'Загроза у Києві';
+      subject.textContent = 'Пари немає';
+      const since = fmtHM(al.since);
+      meta.textContent = al.text + (since ? ' · з ' + since : '');
+      timer.textContent = '';
+      return;
+    }
 
     const current = lessons.find((l) => sec >= l.start && sec < l.end);
     const next = lessons.find((l) => l.start > sec);
@@ -313,20 +395,33 @@
     }
 
     const lessons = getLessons(key);
-    if (lessons.length === 0) {
-      box.appendChild(el('div', 'empty', 'Пар немає'));
-      return;
-    }
-
     const now = nowWallMs();
     const isToday = key === dateKeyOf(now);
     const sec = secOfDay(now);
+
+    // Тривога: обводка картки + смуга зверху (лише коли дивимось сьогоднішній день)
+    const al = currentAlert();
+    const showAlert = !!(al && isToday);
+    box.classList.remove('is-alert-red', 'is-alert-yellow');
+    if (showAlert) {
+      box.classList.add('is-alert-' + al.level);
+      const banner = el('div', 'alert-banner');
+      banner.setAttribute('role', 'status');
+      banner.appendChild(el('span', 'alert-banner__icon'));
+      banner.appendChild(el('span', null, 'Пари немає — ' + lowerFirst(al.text)));
+      box.appendChild(banner);
+    }
+
+    if (lessons.length === 0) {
+      if (!showAlert) box.appendChild(el('div', 'empty', 'Пар немає'));
+      return;
+    }
 
     for (const l of lessons) {
       const card = el('div', 'card');
       if (l.substituted) card.classList.add('is-sub');
       if (l.cancelled) card.classList.add('is-cancelled');
-      if (isToday && !l.cancelled && l.start != null && sec >= l.start && sec < l.end) card.classList.add('is-now');
+      if (!showAlert && isToday && !l.cancelled && l.start != null && sec >= l.start && sec < l.end) card.classList.add('is-now');
 
       card.appendChild(el('div', 'card__num', String(l.lesson)));
       const when = el('div', 'card__when');
@@ -468,6 +563,15 @@
         const cached = localStorage.getItem('schedule_cache');
         if (cached) return JSON.parse(cached);
       } catch (e) { /* не критично */ }
+      // Перший захід без збереженої копії: беремо запасний файл з репозиторію
+      if (CONFIG.FALLBACK_URL) {
+        try {
+          const res = await fetch(CONFIG.FALLBACK_URL + '?t=' + Date.now(), { cache: 'no-store' });
+          if (res.ok) return await res.json();
+        } catch (e) {
+          lastError = e;
+        }
+      }
     }
     throw lastError;
   }
@@ -495,6 +599,7 @@
 
     renderSchedule();
     renderHero();
+    startAlertPolling();
 
     $('todayBtn').addEventListener('click', () => { initState(); renderSchedule(); });
 
@@ -509,11 +614,14 @@
     });
 
     let lastMinute = Math.floor(nowWallMs() / 60000);
+    let lastAlertKey = alertKey();
     setInterval(() => {
       renderHero();
       const minute = Math.floor(nowWallMs() / 60000);
-      if (minute !== lastMinute) { // оновлюємо підсвітку "зараз" і "сьогодні"
+      const ak = alertKey();
+      if (minute !== lastMinute || ak !== lastAlertKey) { // підсвітка "зараз"/"сьогодні" або зміна стану тривоги
         lastMinute = minute;
+        lastAlertKey = ak;
         renderSchedule();
       }
     }, 1000);

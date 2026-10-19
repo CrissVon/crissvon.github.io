@@ -13,6 +13,12 @@
   --warn-text: #e8b931;
   --danger: #f0616d;
   --live-bg: rgba(70,201,129,.09);
+  --alert-red: #ff4d57;
+  --alert-red-bg: rgba(255,77,87,.11);
+  --alert-yellow: #f2c230;
+  --alert-yellow-bg: rgba(242,194,48,.11);
+  /* трикутник «увага» (знак оклику вирізано), фарбується через mask + currentColor */
+  --alert-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M12 2.2L23 21.5H1Z M10.9 9.3V15.3H13.1V9.3Z M10.9 16.9V19.1H13.1V16.9Z'/%3E%3C/svg%3E");
   --radius: 10px;
   --font: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color-scheme: dark;
@@ -34,6 +40,10 @@
   --warn-text: #7a5200;
   --danger: #c93045;
   --live-bg: rgba(28,158,85,.10);
+  --alert-red: #d4222f;
+  --alert-red-bg: rgba(212,34,47,.09);
+  --alert-yellow: #b98300;
+  --alert-yellow-bg: rgba(185,131,0,.10);
   color-scheme: light;
 }
 
@@ -395,6 +405,60 @@ a.chip:active { transform: scale(.97); }
 .error { border-color: var(--danger); color: var(--danger); }
 /* всередині рамки розкладу окрема пунктирна рамка не потрібна */
 .lessons > .empty, .lessons > .error { border: 0; border-radius: 0; }
+
+/* ---------- ТРИВОГА ---------- */
+/* велика картка: обводка (товщава за рахунок inset-тіні, щоб не зміщувати розкладку), трикутник замість точки */
+.hero.is-alert-red {
+  border-color: var(--alert-red);
+  box-shadow: inset 0 0 0 1px var(--alert-red);
+  background: linear-gradient(var(--alert-red-bg), var(--alert-red-bg)), var(--surface);
+}
+.hero.is-alert-yellow {
+  border-color: var(--alert-yellow);
+  box-shadow: inset 0 0 0 1px var(--alert-yellow);
+  background: linear-gradient(var(--alert-yellow-bg), var(--alert-yellow-bg)), var(--surface);
+}
+.hero.is-alert-red .hero__label { color: var(--alert-red); }
+.hero.is-alert-yellow .hero__label { color: var(--alert-yellow); }
+.hero.is-alert-red .hero__label::before,
+.hero.is-alert-yellow .hero__label::before {
+  width: 17px; height: 17px;
+  border-radius: 0;
+  background: currentColor;
+  -webkit-mask: var(--alert-icon) center / contain no-repeat;
+  mask: var(--alert-icon) center / contain no-repeat;
+}
+
+/* картка розкладу: та сама обводка + смуга зверху */
+.lessons.is-alert-red { border-color: var(--alert-red); box-shadow: inset 0 0 0 1px var(--alert-red); }
+.lessons.is-alert-yellow { border-color: var(--alert-yellow); box-shadow: inset 0 0 0 1px var(--alert-yellow); }
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+.alert-banner__icon {
+  flex: none;
+  width: 18px; height: 18px;
+  background: currentColor;
+  -webkit-mask: var(--alert-icon) center / contain no-repeat;
+  mask: var(--alert-icon) center / contain no-repeat;
+}
+.is-alert-red .alert-banner {
+  color: var(--alert-red);
+  background: var(--alert-red-bg);
+  border-bottom-color: color-mix(in srgb, var(--alert-red) 40%, transparent);
+}
+.is-alert-yellow .alert-banner {
+  color: var(--alert-yellow);
+  background: var(--alert-yellow-bg);
+  border-bottom-color: color-mix(in srgb, var(--alert-yellow) 40%, transparent);
+}
 
 /* ---------- FOOTER ---------- */
 .foot {
