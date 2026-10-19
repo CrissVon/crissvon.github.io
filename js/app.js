@@ -103,6 +103,70 @@
     return { day: o.day, week: o.week || weekNumberFor(key) };
   }
 
+  /* ---------- Назви предметів у замінах ---------- */
+  // У замінах предмет часто пишуть з малої літери або скорочено («економ.теорія»). Підбираємо повну назву
+  // з базового розкладу: спершу серед предметів цього ж викладача, потім серед усіх.
+  // Якщо збіг неоднозначний або предмета немає — лише велика перша літера.
+  let subjectIndex = null;
+
+  const wordsOf = (s) =>
+    String(s).toLowerCase().replace(/[’`ʼ]/g, "'").split(/[^a-zа-яіїєґ0-9']+/u).filter(Boolean);
+
+  function buildSubjectIndex() {
+    const map = new Map();
+    const bs = DATA.base_schedule || {};
+    for (const week of Object.values(bs)) {
+      for (const day of Object.values(week || {})) {
+        for (const l of day || []) {
+          if (!l.subject) continue;
+          let e = map.get(l.subject);
+          if (!e) { e = { name: l.subject, words: wordsOf(l.subject), teachers: new Set() }; map.set(l.subject, e); }
+          const ids = l.teacher_ids || (l.teacher_id ? [l.teacher_id] : []);
+          ids.forEach((id) => e.teachers.add(id));
+        }
+      }
+    }
+    return [...map.values()];
+  }
+
+  // 3 — слова збігаються; 1 — скорочення («економ.теорія» → «Економічна теорія»); 0 — не підходить
+  function subjectScore(inWords, cand) {
+    if (inWords.length === cand.words.length && inWords.every((w, i) => w === cand.words[i])) return { s: 3, extra: 0 };
+    let ci = 0;
+    for (const iw of inWords) {
+      if (iw.length < 2) return { s: 0 };
+      while (ci < cand.words.length && !cand.words[ci].startsWith(iw)) ci++;
+      if (ci >= cand.words.length) return { s: 0 };
+      ci++;
+    }
+    return { s: 1, extra: cand.words.length - inWords.length };
+  }
+
+  // wide=false (пошук серед усіх предметів без підказки викладача): скорочення з одного слова не вгадуємо
+  function bestSubject(inWords, list, wide) {
+    let top = null;
+    let tie = false;
+    for (const c of list) {
+      const r = subjectScore(inWords, c);
+      if (!r.s) continue;
+      if (!wide && r.s === 1 && inWords.length < 2) continue;
+      if (!top || r.s > top.s || (r.s === top.s && r.extra < top.extra)) { top = { ...r, c }; tie = false; }
+      else if (r.s === top.s && r.extra === top.extra) tie = true;
+    }
+    return top && !tie ? top.c.name : null;
+  }
+
+  function fixSubject(raw, teacherIds) {
+    if (typeof raw !== 'string' || !raw.trim()) return raw;
+    const text = raw.trim().replace(/\s+/g, ' ');
+    const cap = text.charAt(0).toUpperCase() + text.slice(1);
+    const inWords = wordsOf(text);
+    if (!inWords.length) return cap;
+    if (!subjectIndex) subjectIndex = buildSubjectIndex();
+    const own = subjectIndex.filter((e) => (teacherIds || []).some((id) => e.teachers.has(id)));
+    return bestSubject(inWords, own, true) || bestSubject(inWords, subjectIndex, false) || cap;
+  }
+
   function getLessons(key) {
     const sp = specialFor(key);
     const week = sp ? sp.week : weekNumberFor(key);
@@ -112,7 +176,8 @@
 
     const subs = (DATA.substitutions || {})[key] || {};
     for (const [no, sub] of Object.entries(subs)) {
-      byNo.set(Number(no), { lesson: Number(no), ...sub, substituted: true });
+      const subIds = sub.teacher_ids || (sub.teacher_id ? [sub.teacher_id] : []);
+      byNo.set(Number(no), { lesson: Number(no), ...sub, subject: fixSubject(sub.subject, subIds), substituted: true });
     }
 
     return [...byNo.values()]
