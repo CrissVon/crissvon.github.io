@@ -206,10 +206,13 @@
     document.addEventListener('visibilitychange', run);
   }
 
-  // Напис про тривогу справа вгорі верхньої картки (сама картка не змінюється)
+  // Тривога: плашка з причиною справа вгорі, а вся велика картка фарбується в колір рівня (замість зеленого)
   function renderHeroAlert() {
     const pill = $('heroAlert');
+    const hero = $('hero');
     const al = currentAlert();
+    hero.classList.toggle('is-alert-red', !!al && al.level === 'red');
+    hero.classList.toggle('is-alert-yellow', !!al && al.level === 'yellow');
     if (!al) {
       pill.hidden = true;
       pill.textContent = '';

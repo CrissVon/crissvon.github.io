@@ -407,7 +407,26 @@ a.chip:active { transform: scale(.97); }
 .lessons > .empty, .lessons > .error { border: 0; border-radius: 0; }
 
 /* ---------- ТРИВОГА ---------- */
-/* напис справа вгорі великої картки: сама картка не змінюється */
+/* велика картка під час тривоги: усе, що було зеленим (рамка, фон, напис, точка, шкала прогресу), в колір рівня.
+   Підкріплюється тонким inset-кантом, щоб не зміщувати розкладку. */
+.hero.is-alert-red {
+  border-color: var(--alert-red);
+  box-shadow: inset 0 0 0 1px var(--alert-red);
+  background: linear-gradient(var(--alert-red-bg), var(--alert-red-bg)), var(--surface);
+}
+.hero.is-alert-yellow {
+  border-color: var(--alert-yellow);
+  box-shadow: inset 0 0 0 1px var(--alert-yellow);
+  background: linear-gradient(var(--alert-yellow-bg), var(--alert-yellow-bg)), var(--surface);
+}
+.hero.is-alert-red .hero__label { color: var(--alert-red); }
+.hero.is-alert-yellow .hero__label { color: var(--alert-yellow); }
+.hero.is-alert-red .hero__label::before,
+.hero.is-alert-yellow .hero__label::before { background: currentColor; }
+.hero.is-alert-red .progress__bar { background: var(--alert-red); }
+.hero.is-alert-yellow .progress__bar { background: var(--alert-yellow); }
+
+/* напис справа вгорі великої картки */
 .hero__right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
 .hero__alert {
   display: inline-flex;
