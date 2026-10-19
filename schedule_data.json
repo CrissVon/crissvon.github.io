@@ -5,7 +5,7 @@
       "date": "2026-10-19",
       "week": 2
     },
-    "generated_at": "2026-10-19T19:09:18+03:00"
+    "generated_at": "2026-10-19T20:23:03+03:00"
   },
   "bell_schedule": {
     "1": {
@@ -288,6 +288,10 @@
     }
   },
   "special_days": {
+    "2026-10-10": {
+      "day": "friday",
+      "week": 1
+    },
     "2026-10-17": {
       "day": "monday",
       "week": 2
