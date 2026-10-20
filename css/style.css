@@ -577,6 +577,18 @@ a.chip:active { transform: scale(.97); }
   color: var(--muted);
 }
 .foot:empty { display: none; }
+
+/* попередження під розкладом (перед підвалом з Telegram) */
+.notice {
+  margin: -8px 0 0;   /* притискається до розкладу (в .schedule був би gap 14px) */
+  padding: 0 2px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+  opacity: .75;
+}
+.notice strong { font-weight: inherit; }
 .foot__link { color: var(--link); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent); }
 .foot__link:hover { text-decoration-color: var(--link); }
 
