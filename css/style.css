@@ -65,7 +65,7 @@ body {
 }
 
 /* плавна зміна теми */
-body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today-btn {
+body, .hero, .card, .day, .weeks, .weeks__btn, .settings-btn, .settings-menu, .chip, .empty, .today-btn {
   transition: background-color .25s, border-color .25s, color .25s;
 }
 
@@ -95,9 +95,14 @@ body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today
   font-weight: 700;
   letter-spacing: -.01em;
 }
-.theme-btn {
-  display: grid;
-  place-items: center;
+
+/* ---------- НАЛАШТУВАННЯ ---------- */
+.settings { position: relative; }
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   width: 38px; height: 38px;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -105,12 +110,108 @@ body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today
   color: var(--text);
   cursor: pointer;
 }
-.theme-btn:hover { background: var(--surface); }
-.theme-btn:active { transform: scale(.95); }
-.theme-btn svg { width: 19px; height: 19px; }
-.theme-btn .icon-moon { display: none; }
-:root[data-theme="light"] .theme-btn .icon-sun { display: none; }
-:root[data-theme="light"] .theme-btn .icon-moon { display: block; }
+.settings-btn:hover,
+.settings-btn[aria-expanded="true"] { background: var(--surface); }
+.settings-btn:active { transform: scale(.95); }
+.settings-btn svg { display: block; flex: none; width: 20px; height: 20px; }
+
+.settings-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  width: min(340px, calc(100vw - 32px));
+  padding: 2px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+.settings-menu[hidden] { display: none; }
+
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.set-row:last-child { border-bottom: 0; }
+.set-row__label { font-weight: 600; }
+.set-sounds .set-row__label { flex: 0 0 116px; }
+
+/* перемикач теми: ліворуч темна, праворуч світла */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.theme-toggle__cap { transition: color .2s; }
+.theme-toggle:not(.is-light) .cap--dark,
+.theme-toggle.is-light .cap--light { color: var(--text); }
+.switch {
+  position: relative;
+  flex: none;
+  width: 52px; height: 28px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.switch__knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  transition: transform .2s;
+}
+.switch__knob svg { display: block; width: 14px; height: 14px; }
+/* темна тема — місяць на кружечку зліва, світла — сонечко справа */
+.switch[aria-checked="true"] .i-moon,
+.switch[aria-checked="false"] .i-sun { display: none; }
+.switch[aria-checked="true"] .switch__knob { transform: translateX(24px); }
+
+/* рядки зі звуками: назва · повзунок гучності · мут */
+.set-row--sound input[type="range"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 24px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.mute-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.mute-btn:hover { background: var(--surface-2); }
+.mute-btn.is-muted { color: var(--muted); }
+.mute-btn svg { width: 17px; height: 17px; }
+
+.settings button:focus-visible,
+.settings input:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+@media (max-width: 380px) {
+  .set-row--sound { flex-wrap: wrap; }
+  .set-sounds .set-row__label { flex: 1 0 100%; }
+}
 
 /* ---------- HERO ---------- */
 .hero {
@@ -481,5 +582,6 @@ a.chip:active { transform: scale(.97); }
 
 @media (prefers-reduced-motion: reduce) {
   .progress__bar { transition: none; }
-  body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today-btn { transition: none; }
+  body, .hero, .card, .day, .weeks, .weeks__btn, .settings-btn, .settings-menu, .chip, .empty, .today-btn { transition: none; }
+  .settings-btn svg, .switch__knob, .theme-toggle__cap { transition: none; }
 }

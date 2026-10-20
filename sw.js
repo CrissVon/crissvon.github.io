@@ -2,7 +2,7 @@
  * Стратегія: спочатку мережа (завжди свіжі дані), якщо її немає — остання збережена копія.
  * Змінюєш логіку кешу — підніми версію CACHE.
  */
-const CACHE = 'schedule-v2';
+const CACHE = 'schedule-v3';
 const SHELL = ['./', 'index.html', 'js/app.js', 'css/style.css', 'assets/favicon.png', 'manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {

@@ -567,10 +567,249 @@
     if (m) m.setAttribute('content', t === 'light' ? '#e9e9e9' : '#121212');
   }
 
-  function initTheme() {
-    $('themeBtn').addEventListener('click', () => {
+  /* ---------- Звуки ---------- */
+  // Файли кладемо в папку sounds/. Якщо файлу немає або він не декодується — грає простий запасний сигнал.
+  const SOUNDS = [
+    { id: 'red',    label: 'Червона тривога', file: 'sounds/red.mp3' },
+    { id: 'yellow', label: 'Жовта тривога',   file: 'sounds/yellow.mp3' },
+    { id: 'clear',  label: 'Відбій тривоги',  file: 'sounds/clear.mp3' },
+    { id: 'start',  label: 'Початок пари',    file: 'sounds/lesson-start.mp3' },
+    { id: 'end',    label: 'Кінець пари',     file: 'sounds/lesson-end.mp3' },
+  ];
+
+  // [частота Гц, початок с, тривалість с]
+  const SYNTH = {
+    red:    { type: 'sawtooth', gain: 0.3, notes: [[880, 0, .28], [660, .3, .28], [880, .6, .28], [660, .9, .28]] },
+    yellow: { type: 'triangle', gain: 0.6, notes: [[660, 0, .3], [660, .4, .3]] },
+    clear:  { type: 'sine',     gain: 0.7, notes: [[523, 0, .22], [659, .22, .22], [784, .44, .5]] },
+    start:  { type: 'sine',     gain: 0.7, notes: [[880, 0, .16], [1175, .18, .45]] },
+    end:    { type: 'sine',     gain: 0.7, notes: [[660, 0, .2], [440, .22, .5]] },
+  };
+
+  const DEFAULT_VOL = 70;
+  const soundCfg = {};   // id -> { vol: 0..100, prev: гучність перед мутом }
+
+  function loadSoundCfg() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('sound_settings')) || {}; } catch (e) { /* не критично */ }
+    const clamp = (v, d) => (Number.isFinite(Number(v)) ? Math.min(100, Math.max(0, Math.round(Number(v)))) : d);
+    for (const s of SOUNDS) {
+      const o = saved[s.id] || {};
+      const vol = clamp(o.vol, DEFAULT_VOL);
+      soundCfg[s.id] = { vol, prev: clamp(o.prev, DEFAULT_VOL) || DEFAULT_VOL };
+    }
+  }
+
+  function saveSoundCfg() {
+    try { localStorage.setItem('sound_settings', JSON.stringify(soundCfg)); } catch (e) { /* не критично */ }
+  }
+
+  let actx = null;
+  const buffers = {};   // id -> Promise<AudioBuffer | null>
+
+  function getCtx() {
+    if (!actx) {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      try { actx = new C(); } catch (e) { return null; }
+    }
+    return actx;
+  }
+
+  // Браузери не дозволяють звук до першого кліку/тапу на сторінці — розблоковуємо на першу дію
+  function unlockAudio() {
+    const c = getCtx();
+    if (c && c.state === 'suspended') c.resume().catch(() => {});
+  }
+
+  function loadBuffer(s) {
+    if (!buffers[s.id]) {
+      buffers[s.id] = (async () => {
+        try {
+          const res = await fetch(s.file);
+          if (!res.ok) return null;
+          const data = await res.arrayBuffer();
+          const c = getCtx();
+          return await new Promise((ok, fail) => c.decodeAudioData(data, ok, fail));
+        } catch (e) {
+          return null;
+        }
+      })();
+    }
+    return buffers[s.id];
+  }
+
+  function playSynth(c, dest, def) {
+    for (const [freq, at, dur] of def.notes) {
+      const t0 = c.currentTime + at + 0.01;
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = def.type;
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(def.gain, t0 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(g);
+      g.connect(dest);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.05);
+    }
+  }
+
+  async function playSound(id) {
+    const s = SOUNDS.find((x) => x.id === id);
+    const cfg = soundCfg[id];
+    if (!s || !cfg || cfg.vol <= 0) return;
+    const c = getCtx();
+    if (!c) return;
+    if (c.state === 'suspended') { try { await c.resume(); } catch (e) { /* немає жесту користувача */ } }
+    if (c.state !== 'running') return;
+    const buf = await loadBuffer(s);
+    const gain = c.createGain();
+    gain.gain.value = Math.pow(cfg.vol / 100, 2);   // квадратична шкала: повзунок здається рівнішим
+    gain.connect(c.destination);
+    if (buf) {
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      src.connect(gain);
+      src.start();
+    } else if (SYNTH[id]) {
+      playSynth(c, gain, SYNTH[id]);
+    }
+  }
+
+  // Тригери: зміна рівня тривоги та перетин межі пари (працює і з ?time=... для тесту)
+  let prevAlertLevel;          // undefined = ще не знаємо, перший стан не озвучуємо
+  let lastSoundDay = null;
+  let lastSoundSec = null;
+  const SOUND_LATE_SEC = 70;   // якщо вкладка засинала більше, старий звук не граємо
+
+  function checkSounds() {
+    if (forcedAlert || alertState.at) {
+      const lvl = forcedAlert ? forcedAlert.level : (alertState.data ? alertState.data.level : null);
+      if (prevAlertLevel === undefined) {
+        prevAlertLevel = lvl;
+      } else if (lvl !== prevAlertLevel) {
+        prevAlertLevel = lvl;
+        playSound(lvl === null ? 'clear' : lvl);
+      }
+    }
+
+    if (!DATA) return;
+    const now = nowWallMs();
+    const day = dateKeyOf(now);
+    const sec = secOfDay(now);
+    if (lastSoundDay === day && lastSoundSec !== null) {
+      const crossed = (t) => lastSoundSec < t && t <= sec && sec - t <= SOUND_LATE_SEC;
+      let start = false;
+      let end = false;
+      for (const l of getLessons(day)) {
+        if (l.cancelled || l.start == null) continue;
+        if (crossed(l.start)) start = true;
+        if (crossed(l.end)) end = true;
+      }
+      if (start) playSound('start');
+      if (end) playSound('end');
+    }
+    lastSoundDay = day;
+    lastSoundSec = sec;
+  }
+
+  /* ---------- Меню налаштувань ---------- */
+  const ICON_VOL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+  const ICON_MUTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
+  function buildSoundRows() {
+    const box = $('soundRows');
+    for (const s of SOUNDS) {
+      const cfg = soundCfg[s.id];
+      const row = el('div', 'set-row set-row--sound');
+      row.appendChild(el('span', 'set-row__label', s.label));
+
+      const range = document.createElement('input');
+      range.type = 'range';
+      range.min = '0';
+      range.max = '100';
+      range.step = '5';
+      range.setAttribute('aria-label', 'Гучність: ' + s.label);
+      row.appendChild(range);
+
+      const mute = el('button', 'mute-btn');
+      mute.type = 'button';
+      row.appendChild(mute);
+
+      const sync = () => {
+        range.value = String(cfg.vol);
+        const muted = cfg.vol === 0;
+        mute.classList.toggle('is-muted', muted);
+        mute.innerHTML = muted ? ICON_MUTE : ICON_VOL;
+        const txt = muted ? 'Увімкнути звук: ' : 'Вимкнути звук: ';
+        mute.setAttribute('aria-label', txt + s.label);
+        mute.title = muted ? 'Увімкнути звук' : 'Вимкнути звук';
+      };
+
+      range.addEventListener('input', () => {
+        cfg.vol = Number(range.value);
+        if (cfg.vol > 0) cfg.prev = cfg.vol;
+        saveSoundCfg();
+        sync();
+      });
+      // після того як відпустив повзунок — програємо звук, щоб було чутно гучність
+      range.addEventListener('change', () => playSound(s.id));
+      mute.addEventListener('click', () => {
+        if (cfg.vol > 0) {
+          cfg.prev = cfg.vol;
+          cfg.vol = 0;
+        } else {
+          cfg.vol = cfg.prev || DEFAULT_VOL;
+        }
+        saveSoundCfg();
+        sync();
+        if (cfg.vol > 0) playSound(s.id);
+      });
+
+      sync();
+      box.appendChild(row);
+    }
+  }
+
+  function initSettings() {
+    loadSoundCfg();
+    buildSoundRows();
+
+    ['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
+      document.addEventListener(ev, unlockAudio, { passive: true })
+    );
+
+    // перемикач теми (темна — за замовчуванням)
+    const sw = $('themeSwitch');
+    const toggle = $('themeToggle');
+    const syncTheme = () => {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      sw.setAttribute('aria-checked', String(light));
+      toggle.classList.toggle('is-light', light);
+    };
+    sw.addEventListener('click', () => {
       const light = document.documentElement.getAttribute('data-theme') === 'light';
       applyTheme(light ? 'dark' : 'light');
+      syncTheme();
+    });
+    syncTheme();
+
+    // відкриття/закриття меню
+    const wrap = $('settings');
+    const btn = $('settingsBtn');
+    const menu = $('settingsMenu');
+    const setOpen = (open) => {
+      menu.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+    };
+    btn.addEventListener('click', () => setOpen(menu.hidden));
+    document.addEventListener('pointerdown', (e) => {
+      if (!menu.hidden && !wrap.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) { setOpen(false); btn.focus(); }
     });
   }
 
@@ -635,7 +874,7 @@
   }
 
   async function main() {
-    initTheme();
+    initSettings();
     // офлайн-кеш (працює лише на https/localhost)
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
     try {
@@ -665,6 +904,7 @@
     let lastAlertKey = alertKey();
     setInterval(() => {
       renderHero();
+      checkSounds();
       const minute = Math.floor(nowWallMs() / 60000);
       const ak = alertKey();
       if (minute !== lastMinute || ak !== lastAlertKey) { // підсвітка "зараз"/"сьогодні" або зміна стану тривоги
