@@ -205,12 +205,27 @@
       });
   }
 
+  // Таймер, який не гальмує у фоновій вкладці: браузер сильно уповільнює setInterval у прихованих вкладках
+  // (до разу на хвилину), а таймери у Web Worker — ні, тому звуки та тривога спрацьовують вчасно.
+  // Якщо Worker недоступний (старий браузер, CSP) — звичайний setInterval.
+  function startTicker(cb, ms) {
+    try {
+      const src = 'setInterval(function(){postMessage(0)},' + ms + ')';
+      const w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+      w.onmessage = () => cb();
+      return;
+    } catch (e) { /* без Worker */ }
+    setInterval(cb, ms);
+  }
+
   /* ---------- Тривога ---------- */
   // Джерело: Cloudflare Worker (worker/alert-proxy.js) → { ok, alert: null | { level: 'red'|'yellow', text, since } }
   // Тест без реальної тривоги:  ?alert=red  або  ?alert=yellow  (і необов'язково &alerttext=Ваш текст)
   const ALERT_POLL_MS = 45 * 1000;
   const ALERT_STALE_MS = 3 * 60 * 1000; // дані старіші — ховаємо тривогу, а не показуємо «все спокійно»
   const alertState = { data: null, at: 0 };
+  let lastAlertPollAt = 0;
+  let resumeGraceUntil = 0;   // після повернення на вкладку показуємо останній відомий стан, поки не прийде свіжий
 
   const forcedAlert = (() => {
     const lvl = params.get('alert');
@@ -225,7 +240,7 @@
   function currentAlert() {
     if (forcedAlert) return forcedAlert;
     if (!alertState.data) return null;
-    if (Date.now() - alertState.at > ALERT_STALE_MS) return null;
+    if (Date.now() - alertState.at > ALERT_STALE_MS && Date.now() > resumeGraceUntil) return null;
     return alertState.data;
   }
 
@@ -263,12 +278,24 @@
     }
   }
 
+  // Опитуємо і у фоновій вкладці (викликається з головного таймера), інакше звук тривоги не спрацює.
+  function pollAlertIfDue(force) {
+    if (!CONFIG.ALERT_URL || forcedAlert) return;
+    const now = Date.now();
+    if (now - lastAlertPollAt < (force ? 3000 : ALERT_POLL_MS)) return;
+    lastAlertPollAt = now;
+    pollAlert();
+  }
+
   function startAlertPolling() {
     if (!CONFIG.ALERT_URL || forcedAlert) return;
-    const run = () => { if (!document.hidden) pollAlert(); };
-    run();
-    setInterval(run, ALERT_POLL_MS);
-    document.addEventListener('visibilitychange', run);
+    pollAlertIfDue(true);
+    // повернулись на вкладку: оновлюємо одразу, а поки чекаємо — не ховаємо останню відому тривогу
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return;
+      resumeGraceUntil = Date.now() + 6000;
+      pollAlertIfDue(true);
+    });
   }
 
   // Тривога: плашка з причиною справа вгорі, а вся велика картка фарбується в колір рівня (замість зеленого)
@@ -640,6 +667,7 @@
   }
 
   function playSynth(c, dest, def) {
+    const nodes = [];
     for (const [freq, at, dur] of def.notes) {
       const t0 = c.currentTime + at + 0.01;
       const osc = c.createOscillator();
@@ -653,29 +681,59 @@
       g.connect(dest);
       osc.start(t0);
       osc.stop(t0 + dur + 0.05);
+      nodes.push(osc);
+    }
+    return nodes;
+  }
+
+  // Тестове відтворення (повзунки і кнопка «звук» в налаштуваннях): новий тест перериває попередній.
+  // Реальні звуки (тривога, початок/кінець пари) нічого не переривають і самі не перериваються — вони можуть накладатись.
+  let previewVoice = null;   // { gain, nodes } поточний тестовий звук
+  let previewToken = 0;      // збільшується при кожному новому тесті: скасовує ті, що ще вантажаться
+
+  function stopPreview() {
+    previewToken++;
+    const v = previewVoice;
+    previewVoice = null;
+    if (!v || !actx) return;
+    const t = actx.currentTime;
+    try {
+      v.gain.gain.cancelScheduledValues(t);
+      v.gain.gain.setValueAtTime(v.gain.gain.value, t);
+      v.gain.gain.linearRampToValueAtTime(0, t + 0.03);   // коротке затухання, щоб не було клацання
+    } catch (e) { /* не критично */ }
+    for (const n of v.nodes) {
+      try { n.stop(t + 0.04); } catch (e) { /* вузол уже завершився */ }
     }
   }
 
-  async function playSound(id) {
+  async function playSound(id, preview = false) {
     const s = SOUNDS.find((x) => x.id === id);
     const cfg = soundCfg[id];
-    if (!s || !cfg || cfg.vol <= 0) return;
+    if (!s || !cfg) return;
+    if (preview) stopPreview();        // новий тест зупиняє старий (навіть якщо цей звук вимкнено)
+    if (cfg.vol <= 0) return;
+    const myToken = previewToken;
     const c = getCtx();
     if (!c) return;
     if (c.state === 'suspended') { try { await c.resume(); } catch (e) { /* немає жесту користувача */ } }
     if (c.state !== 'running') return;
     const buf = await loadBuffer(s);
+    if (preview && myToken !== previewToken) return;   // поки вантажились, запустили інший тест
     const gain = c.createGain();
     gain.gain.value = Math.pow(cfg.vol / 100, 2);   // квадратична шкала: повзунок здається рівнішим
     gain.connect(c.destination);
+    const nodes = [];
     if (buf) {
       const src = c.createBufferSource();
       src.buffer = buf;
       src.connect(gain);
       src.start();
+      nodes.push(src);
     } else if (SYNTH[id]) {
-      playSynth(c, gain, SYNTH[id]);
+      nodes.push(...playSynth(c, gain, SYNTH[id]));
     }
+    if (preview) previewVoice = { gain, nodes };
   }
 
   // Тригери: зміна рівня тривоги та перетин межі пари (працює і з ?time=... для тесту)
@@ -755,7 +813,7 @@
         sync();
       });
       // після того як відпустив повзунок — програємо звук, щоб було чутно гучність
-      range.addEventListener('change', () => playSound(s.id));
+      range.addEventListener('change', () => playSound(s.id, true));
       mute.addEventListener('click', () => {
         if (cfg.vol > 0) {
           cfg.prev = cfg.vol;
@@ -765,7 +823,7 @@
         }
         saveSoundCfg();
         sync();
-        if (cfg.vol > 0) playSound(s.id);
+        playSound(s.id, true);   // якщо звук вимкнено, такий виклик лише зупиняє попередній тест
       });
 
       sync();
@@ -902,17 +960,24 @@
 
     let lastMinute = Math.floor(nowWallMs() / 60000);
     let lastAlertKey = alertKey();
-    setInterval(() => {
-      renderHero();
+    startTicker(() => {
+      pollAlertIfDue(false);
+      if (!document.hidden) renderHero();   // у прихованій вкладці перемальовувати немає кому, а звуки перевіряємо завжди
       checkSounds();
       const minute = Math.floor(nowWallMs() / 60000);
       const ak = alertKey();
       if (minute !== lastMinute || ak !== lastAlertKey) { // підсвітка "зараз"/"сьогодні" або зміна стану тривоги
         lastMinute = minute;
         lastAlertKey = ak;
-        renderSchedule();
+        if (!document.hidden) renderSchedule();
       }
     }, 1000);
+    // повернулись на вкладку — одразу малюємо актуальний стан, без очікування наступного тику
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return;
+      renderHero();
+      renderSchedule();
+    });
   }
 
   main();
