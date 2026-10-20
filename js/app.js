@@ -306,17 +306,9 @@
     return '';
   }
 
-  // Уся велика картка клікабельна, коли є посилання на пару
+  // Картка сама не клікабельна: за посиланням ведуть лише кнопка «Підключитися» та плашки викладачів
   function setHeroLink(hero, url) {
     hero.dataset.link = url || '';
-    hero.classList.toggle('is-link', !!url);
-    if (url) {
-      hero.setAttribute('role', 'link');
-      hero.tabIndex = 0;
-    } else {
-      hero.removeAttribute('role');
-      hero.removeAttribute('tabindex');
-    }
   }
 
   // Плашки викладачів у великій картці (для пар з кількома викладачами).
@@ -668,16 +660,6 @@
     startAlertPolling();
 
     $('todayBtn').addEventListener('click', () => { initState(); renderSchedule(); });
-
-    const hero = $('hero');
-    const openHero = () => {
-      const url = hero.dataset.link;
-      if (url) window.open(url, '_blank', 'noopener');
-    };
-    hero.addEventListener('click', (e) => { if (!e.target.closest('a')) openHero(); });
-    hero.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('a')) { e.preventDefault(); openHero(); }
-    });
 
     let lastMinute = Math.floor(nowWallMs() / 60000);
     let lastAlertKey = alertKey();

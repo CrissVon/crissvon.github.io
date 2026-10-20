@@ -120,9 +120,6 @@ body, .hero, .card, .day, .weeks, .weeks__btn, .theme-btn, .chip, .empty, .today
   background: var(--surface);
   border: 1px solid var(--border);
 }
-.hero.is-link { cursor: pointer; transition: transform .1s, border-color .2s, background-color .25s; }
-.hero.is-link:active { transform: scale(.99); }
-.hero.is-link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 .hero.is-live {
   border-color: var(--ok);
   background: linear-gradient(var(--live-bg), var(--live-bg)), var(--surface);
