@@ -869,6 +869,182 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !menu.hidden) { setOpen(false); btn.focus(); }
     });
+
+    initBrowserGuide();
+  }
+
+  /* ---------- Інструкція для ПК: іконки браузерів ---------- */
+  // Наведення — вікно з кроками показується, мишку прибрали — зникає. Клік — вікно «закріплюється» до повторного кліку.
+  function initBrowserGuide() {
+    const root = $('pcGuide');
+    const pop = $('brPop');
+    if (!root || !pop) return;
+
+    const SITE = 'crissvon.github.io';
+    const NONE = 'нічого робити не треба.';
+    // у кроках: рядок — звичайний текст, { copy } — адреса з кнопкою «скопіювати» (chrome:// і edge:// з сайту відкрити не можна)
+    const GUIDES = {
+      chrome: {
+        title: 'Chrome',
+        steps: [
+          ['Відкрийте нову вкладку, вставте ', { copy: 'chrome://settings/performance' }, ' і натисніть Enter (або Налаштування → «Ефективність»)'],
+          ['Знайдіть пункт «Ніколи не деактивувати ці сайти» і натисніть «Додати»'],
+          ['Введіть ', { copy: SITE }, ' і підтвердьте'],
+        ],
+        note: 'Якщо такого пункту у ваших налаштуваннях немає, нічого додавати не треба.',
+      },
+      edge: {
+        title: 'Edge',
+        steps: [
+          ['Відкрийте нову вкладку, вставте ', { copy: 'edge://settings/system/performance' }, ' і натисніть Enter (або Параметри → «Система й продуктивність» → «Продуктивність»)'],
+          ['Знайдіть пункт «Завжди залишати ці сайти активними» і натисніть «Додавання сайту»'],
+          ['Введіть ', { copy: SITE }, ' і підтвердьте'],
+        ],
+        note: 'Якщо такого пункту у ваших налаштуваннях немає, нічого додавати не треба.',
+      },
+      firefox: { title: 'Firefox', none: 'У Firefox ' + NONE },
+      safari:  { title: 'Safari',  none: 'У Safari ' + NONE },
+      opera: {
+        title: 'Opera',
+        steps: [
+          ['Відкрийте нову вкладку, вставте ', { copy: 'opera://settings' }, ' і натисніть Enter'],
+          ['У пошуку налаштувань введіть «snooze» і знайдіть пункт про присипляння неактивних вкладок («Snooze inactive tabs to save memory»)'],
+          ['Вимкніть його'],
+        ],
+        note: 'Винятків для окремих сайтів в Opera немає, лише повне вимкнення. Також закріплена вкладка (ПКМ → «Закріпити») не присипляється. Якщо цей пункт уже вимкнений або його немає, нічого робити не треба.',
+      },
+    };
+
+    const copyText = async (text) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (e) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+          document.body.appendChild(ta);
+          ta.select();
+          const ok = document.execCommand('copy');
+          ta.remove();
+          return ok;
+        } catch (e2) {
+          return false;
+        }
+      }
+    };
+
+    const copyBtn = (text) => {
+      const b = el('button', 'br-copy', text);
+      b.type = 'button';
+      b.title = 'Натисніть, щоб скопіювати';
+      b.addEventListener('click', async () => {
+        if (!(await copyText(text))) return;
+        b.classList.add('is-copied');
+        b.textContent = 'Скопійовано ✓';
+        setTimeout(() => { b.classList.remove('is-copied'); b.textContent = text; }, 1200);
+      });
+      return b;
+    };
+
+    const render = (id) => {
+      const g = GUIDES[id];
+      pop.textContent = '';
+      pop.appendChild(el('p', 'br-pop__title', g.title));
+      if (g.none) {
+        pop.appendChild(el('p', '', g.none));
+        return;
+      }
+      const ol = document.createElement('ol');
+      for (const parts of g.steps) {
+        const li = document.createElement('li');
+        for (const p of parts) li.appendChild(typeof p === 'string' ? document.createTextNode(p) : copyBtn(p.copy));
+        ol.appendChild(li);
+      }
+      pop.appendChild(ol);
+      pop.appendChild(el('p', 'br-pop__note', g.note));
+    };
+
+    const btns = [...root.querySelectorAll('.br')];
+
+    // Іконки лежать у assets/browsers/. Беремо перший файл зі списку, що існує; немає жодного — лишається літера.
+    const ICON_FILES = {
+      chrome:  ['chrome.png'],
+      edge:    ['edge.svg'],
+      firefox: ['firefox.png'],
+      safari:  ['safari.png'],
+      opera:   ['opera.png'],
+    };
+    for (const b of btns) {
+      const files = (ICON_FILES[b.dataset.br] || []).slice();
+      const tryNext = () => {
+        const f = files.shift();
+        if (!f) return;
+        // повна адреса: відносний url() у CSS-змінній рахувався б від css/style.css, а не від сторінки
+        const url = new URL('assets/browsers/' + f, document.baseURI).href;
+        const probe = new Image();
+        probe.onload = () => {
+          b.style.setProperty('--ico', 'url("' + url + '")');
+          b.classList.add('has-ico');
+        };
+        probe.onerror = tryNext;
+        probe.src = url;
+      };
+      tryNext();
+    }
+    let shown = null;
+    let pinned = false;
+    let timer = null;
+
+    const mark = (id) => btns.forEach((b) => {
+      const on = b.dataset.br === id;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-expanded', String(on));
+    });
+    const show = (id) => {
+      clearTimeout(timer);
+      if (shown !== id) render(id);
+      shown = id;
+      pop.hidden = false;
+      mark(id);
+    };
+    const hide = () => {
+      clearTimeout(timer);
+      shown = null;
+      pinned = false;
+      pop.hidden = true;
+      mark(null);
+    };
+    const hideLater = () => {
+      if (pinned) return;
+      clearTimeout(timer);
+      timer = setTimeout(hide, 220);   // невелика затримка, щоб встигнути перевести мишку з іконки у вікно
+    };
+
+    const canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+    for (const b of btns) {
+      const id = b.dataset.br;
+      if (canHover) {
+        b.addEventListener('mouseenter', () => { if (!pinned) show(id); });
+        b.addEventListener('mouseleave', hideLater);
+      }
+      b.addEventListener('focus', () => { if (!pinned) show(id); });
+      b.addEventListener('blur', hideLater);
+      b.addEventListener('click', () => {
+        if (pinned && shown === id) hide();
+        else { pinned = true; show(id); }
+      });
+    }
+    pop.addEventListener('mouseenter', () => clearTimeout(timer));
+    pop.addEventListener('mouseleave', hideLater);
+
+    // закріплене вікно закривається кліком повз нього, Esc або закриттям меню налаштувань
+    document.addEventListener('pointerdown', (e) => { if (pinned && !root.contains(e.target)) hide(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && shown) hide(); });
+    new MutationObserver(() => { if ($('settingsMenu').hidden) hide(); })
+      .observe($('settingsMenu'), { attributes: true, attributeFilter: ['hidden'] });
   }
 
   /* ---------- Старт ---------- */
